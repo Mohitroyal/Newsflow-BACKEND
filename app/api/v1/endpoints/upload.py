@@ -4,6 +4,7 @@ import uuid
 import os
 import shutil
 from fastapi.encoders import jsonable_encoder
+from app.core.config import settings
 
 router = APIRouter()
 
