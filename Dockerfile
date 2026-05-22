@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxext6 \
     libxfixes3 \
-    librandr2 \
+    libxrandr2 \
     libgbm1 \
     libpango-1.0-0 \
     libasound2 \
@@ -27,11 +27,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     zlib1g-dev \
     fonts-noto-core \
-    fonts-noto-telugu \
-    fonts-noto-devanagari \
-    fonts-noto-kannada \
-    fonts-noto-tamil \
-    fonts-noto-malayalam \
+    fonts-noto-cjk \
+    fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -50,4 +47,5 @@ RUN chown -R user:user /app
 USER user
 
 # Hugging Face spaces expect port 7860
+EXPOSE 7860
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
