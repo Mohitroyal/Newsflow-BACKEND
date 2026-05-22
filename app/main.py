@@ -19,23 +19,24 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Set all CORS enabled origins
-if settings.ENVIRONMENT == "development":
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origin_regex="https?://.*",
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-elif settings.CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# Always add explicit production origins
+origins = [
+    "http://localhost:3000",
+    "https://newsflow-frontend-nu.vercel.app",
+    "https://newscraft-ai.vercel.app"
+]
+
+if settings.CORS_ORIGINS:
+    origins.extend([str(origin) for origin in settings.CORS_ORIGINS])
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_origin_regex="https?://.*" if settings.ENVIRONMENT == "development" else None,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():

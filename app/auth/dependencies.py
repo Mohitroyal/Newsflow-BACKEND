@@ -67,6 +67,7 @@ def _get_or_create_supabase_user(db: Session, supabase_user) -> User:
 
 def _try_supabase_token(token: str, db: Session):
     """Attempt to verify token as a Supabase JWT using the service role."""
+    print(f"[AUTH DEBUG] Trying Supabase token (length: {len(token)})")
     try:
         from supabase import create_client
         supabase_client = create_client(
@@ -74,6 +75,7 @@ def _try_supabase_token(token: str, db: Session):
             settings.SUPABASE_SERVICE_ROLE_KEY
         )
         response = supabase_client.auth.get_user(token)
+        print(f"[AUTH DEBUG] Supabase get_user response: {response}")
         if response and response.user:
             return _get_or_create_supabase_user(db, response.user)
     except Exception as e:
@@ -85,11 +87,13 @@ def _try_supabase_token(token: str, db: Session):
 def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> User:
+    print(f"[AUTH DEBUG] get_current_user called with token length: {len(token)}")
     # ── Path 1: Supabase Google OAuth token ──────────────────────────────────
     # Supabase tokens are significantly longer than local JWTs (~200+ chars)
     if len(token) > 150:
         user = _try_supabase_token(token, db)
         if user:
+            print(f"[AUTH DEBUG] User authenticated via Supabase: {user.email}")
             return user
 
     # ── Path 2: Local JWT (email/password login) ──────────────────────────────

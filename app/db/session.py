@@ -5,6 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 db_url = settings.DATABASE_URL
+# Strip unsupported query parameters like ?pgbouncer=true
+if "?" in db_url:
+    db_url = db_url.split("?")[0]
+
 import sys
 is_testing = "pytest" in sys.modules or "unittest" in sys.modules or os.environ.get("TESTING") == "1"
 
@@ -21,10 +25,14 @@ elif "sqlite" not in db_url:
         print(f"[WARNING] PostgreSQL host {host}:{port} is unreachable. Falling back to local SQLite.")
         db_url = "sqlite:///./newscraft.db"
 
+print("DATABASE_URL =", os.environ.get("DATABASE_URL"))
+print("Parsed DB URL =", db_url)
+
 if db_url.startswith("sqlite"):
     engine = create_engine(db_url, connect_args={"check_same_thread": False})
 else:
     engine = create_engine(db_url, pool_pre_ping=True)
+    print("Database engine initialized successfully.")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
