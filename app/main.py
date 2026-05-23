@@ -19,6 +19,34 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
+from fastapi import Request
+import time
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    try:
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        logger.info(
+            "request_completed",
+            method=request.method,
+            url=str(request.url),
+            status_code=response.status_code,
+            duration=f"{process_time:.3f}s"
+        )
+        return response
+    except Exception as e:
+        process_time = time.time() - start_time
+        logger.error(
+            "request_failed",
+            method=request.method,
+            url=str(request.url),
+            error=str(e),
+            duration=f"{process_time:.3f}s"
+        )
+        raise
+
 # Always add explicit production origins
 origins = [
     "http://localhost:3000",
@@ -41,6 +69,10 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message": "Welcome to NewsCraft AI API", "docs": "/docs"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 import os
 from fastapi.staticfiles import StaticFiles

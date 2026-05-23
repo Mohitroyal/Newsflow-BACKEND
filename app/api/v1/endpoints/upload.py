@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from typing import Any
 import uuid
 import os
-import shutil
+import os
 from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 
@@ -28,8 +28,9 @@ async def upload_image(
     file_path = os.path.join(upload_dir, filename)
     
     try:
+        content = await file.read()
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(content)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Could not save file")
         
