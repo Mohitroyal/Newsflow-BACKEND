@@ -71,6 +71,7 @@ def root():
     return {"message": "Welcome to NewsCraft AI API", "docs": "/docs"}
 
 @app.get("/health")
+@app.get("/api/v1/health")
 async def health():
     return {"status": "ok"}
 
