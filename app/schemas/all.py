@@ -8,21 +8,10 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: Optional[str] = None
 
-class UserCreate(UserBase):
-    password: str
-    firstName: Optional[str] = None
-    lastName: Optional[str] = None
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-class UserUpdate(UserBase):
-    password: Optional[str] = None
 
 class User(UserBase):
     id: UUID
-    is_active: bool
     subscription_plan: str
     subscription_status: str
     created_at: datetime
@@ -79,10 +68,4 @@ class Clipping(BaseModel):
         from_attributes = True
         populate_by_name = True
 
-# ─── Auth Schemas ────────────────────────────────────────────────
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
-class TokenPayload(BaseModel):
-    sub: Optional[str] = None

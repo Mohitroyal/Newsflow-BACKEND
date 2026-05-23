@@ -50,8 +50,6 @@ def _get_or_create_supabase_user(db: Session, supabase_user) -> User:
             email=email,
             full_name=full_name,
             supabase_id=str(supabase_id) if supabase_id else None,
-            is_active=True,
-            is_superuser=False,
             subscription_plan="free",
             subscription_status="active",
         )
@@ -83,7 +81,9 @@ def get_current_user(
         )
         response = supabase_client.auth.get_user(token)
         if response and response.user:
-            return _get_or_create_supabase_user(db, response.user)
+            user = _get_or_create_supabase_user(db, response.user)
+            print("Authenticated user:", user.email)
+            return user
     except Exception as e:
         print(f"[AUTH ERROR] Supabase token validation failed: {e}")
 
@@ -97,15 +97,9 @@ def get_current_user(
 def get_current_active_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
-    if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 def get_current_active_superuser(
     current_user: User = Depends(get_current_user),
 ) -> User:
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
-        )
     return current_user
